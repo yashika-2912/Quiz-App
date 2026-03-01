@@ -944,6 +944,7 @@
       margin-left: 8px;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -966,8 +967,8 @@
     <div class="modal">
       <h3>Student Answer Page</h3>
       <p>Students scan this QR or open the link on their device to submit answers</p>
-      <div class="qr-placeholder"></div>
-      <div class="modal-url">student.html</div>
+      <div id="realQR" style="margin:0 auto 20px;"></div>
+      <div class="modal-url" id="studentLink"></div>
       <button class="modal-close" onclick="document.getElementById('qrModal').classList.remove('open')">CLOSE</button>
     </div>
   </div>
@@ -982,7 +983,9 @@
       <button class="tab" onclick="showRound(4)">R4 · BATTLE</button>
       <button class="tab" onclick="showRound(5)">R5 · JS</button>
     </div>
-    <button class="qr-btn" onclick="document.getElementById('qrModal').classList.add('open')">📱 SHOW QR</button>
+    <button class="qr-btn" onclick="openQRModal()">
+      SHOW QR
+    </button>
   </header>
 
   <main>
@@ -1329,7 +1332,8 @@
             <div class="answer"><span class="answer-highlight">String concatenation!</span> <code>.value</code> always
               returns a string. <code>score</code> starts at <code>1</code> (number), so <code>1 + "10"</code> =
               <code>"110"</code> — not 11!<span class="answer-note">→ Fix: wrap with Number(val) or parseInt(val). The
-                classic type coercion trap.</span></div>
+                classic type coercion trap.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1353,7 +1357,8 @@ console.<span class="fn">log</span>(b.value);</pre>
             <div class="answer"><span class="answer-highlight">b still points to the original object.</span>
               <code>b = a</code> copies the reference, not the value. Reassigning <code>a</code> to a new object doesn't
               affect <code>b</code> at all.<span class="answer-note">→ Reference vs value — b is still locked to {
-                value: 10 }.</span></div>
+                value: 10 }.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1386,7 +1391,8 @@ console.<span class="fn">log</span>(b.value);</pre>
             <div class="answer"><span class="answer-highlight">f(1) → f(2) → f(3) → f(4).</span> When n=4,
               <code>n &gt; 3</code> is true, returns 4. That value bubbles all the way back up.<span
                 class="answer-note">→ Trace it step by step: each call waits for the next until the base case
-                hits.</span></div>
+                hits.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1499,7 +1505,8 @@ console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">
               class="answer-highlight">arr[1]</span> is undefined but <span class="answer-highlight">1 in arr</span> is
             false — the slot doesn't exist at all. Length tracks highest index+1, index 3 (value 4) does exist so <span
               class="answer-highlight">3 in arr</span> is true.<span class="answer-note">→ Two of JS's darkest corners
-              in one card: type coercion and array holes.</span></div>
+              in one card: type coercion and array holes.</span>
+          </div>
         </div>
 
       </div>
@@ -1595,6 +1602,100 @@ console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">
         el.style[b.style] = breakOriginals[id] || '';
       });
       document.querySelectorAll('.break-btn').forEach(b => b.classList.remove('active-break'));
+    }
+  </script>
+  <script>
+    const studentURL = "https://yashika-2912.github.io/Quiz-App/student.html";
+
+    document.getElementById("studentLink").textContent = studentURL;
+
+    new QRCode(document.getElementById("realQR"), {
+      text: studentURL,
+      width: 180,
+      height: 180
+    });
+  </script>
+  <script>
+    let qrCreated = false;
+
+    function generateQR() {
+      if (qrCreated) return;
+
+      const base = window.location.origin +
+        window.location.pathname.replace("index.html", "");
+
+      const studentURL = base + "student.html";
+
+      document.getElementById("studentLink").textContent = studentURL;
+
+      new QRCode(document.getElementById("realQR"), {
+        text: studentURL,
+        width: 180,
+        height: 180
+      });
+
+      qrCreated = true;
+    }
+
+    document.querySelector(".qr-btn").addEventListener("click", function () {
+      document.getElementById("qrModal").classList.add("open");
+      generateQR();
+    });
+  </script>
+  <script>
+    let qrMade = false;
+
+    function openQRModal() {
+      document.getElementById("qrModal").classList.add("open");
+
+      if (!qrMade) {
+        generateQR();
+        qrMade = true;
+      }
+    }
+
+    function generateQR() {
+      const baseURL =
+        window.location.origin +
+        window.location.pathname.replace("index.html", "");
+
+      const studentURL = baseURL + "student.html";
+
+      document.getElementById("studentLink").textContent = studentURL;
+
+      new QRCode(document.getElementById("realQR"), {
+        text: studentURL,
+        width: 180,
+        height: 180
+      });
+    }
+  </script>
+  <script>
+    let qrMade = false;
+
+    function openQRModal() {
+      document.getElementById("qrModal").classList.add("open");
+
+      if (!qrMade) {
+        generateQR();
+        qrMade = true;
+      }
+    }
+
+    function generateQR() {
+      const baseURL =
+        window.location.origin +
+        window.location.pathname.replace("index.html", "");
+
+      const studentURL = baseURL + "student.html";
+
+      document.getElementById("studentLink").textContent = studentURL;
+
+      new QRCode(document.getElementById("realQR"), {
+        text: studentURL,
+        width: 180,
+        height: 180
+      });
     }
   </script>
 </body>
