@@ -1626,12 +1626,6 @@ console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">
     const studentURL = "https://yashika-2912.github.io/Quiz-App/student.html";
 
     document.getElementById("studentLink").textContent = studentURL;
-
-    new QRCode(document.getElementById("realQR"), {
-      text: studentURL,
-      width: 180,
-      height: 180
-    });
   </script>
   <script>
     let qrCreated = false;
@@ -1645,6 +1639,12 @@ console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">
       const studentURL = base + "student.html";
 
       document.getElementById("studentLink").textContent = studentURL;
+
+      new QRCode(document.getElementById("realQR"), {
+        text: studentURL,
+        width: 180,
+        height: 180
+      });
 
       qrCreated = true;
     }
