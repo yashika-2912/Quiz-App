@@ -1669,25 +1669,23 @@ console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">
       const qrContainer = document.getElementById("realQR");
       const linkBox = document.getElementById("studentLink");
 
-      // show modal FIRST
-      modal.classList.add("open");
+      const studentURL = "https://your-student-page-link.com"; // your link
 
-      // clear old QR
+      // ✅ IMPORTANT — remove old QR
       qrContainer.innerHTML = "";
 
-      // wait until modal is rendered
-      requestAnimationFrame(() => {
-        new QRCode(qrContainer, {
-          text: window.location.href,
-          width: 180,
-          height: 180,
-          correctLevel: QRCode.CorrectLevel.H
-        });
+      // create ONE QR only
+      new QRCode(qrContainer, {
+        text: studentURL,
+        width: 180,
+        height: 180
       });
 
-      linkBox.textContent = window.location.href;
+      linkBox.textContent = studentURL;
+      modal.classList.add("open");
     }
+  </script>
+  </script>
+</body>
 
-    
-</body >
-</html >
+</html>
