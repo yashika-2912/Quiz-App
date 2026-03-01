@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code & Chaos — Presenter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a26;
+      --border: #2a2a3a;
+      --accent: #ff3f6c;
+      --accent2: #3fefb4;
+      --accent3: #ffd23f;
+      --accent4: #a78bfa;
+      --text: #f0f0f8;
+      --muted: #6b6b8a;
+      --code-bg: #0d0d18;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.4;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 36px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent4));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .round-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .tab:hover {
+      border-color: var(--accent4);
+      color: var(--accent4);
+    }
+
+    .tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      font-weight: 700;
+    }
+
+    .qr-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: 1px solid var(--accent2);
+      background: transparent;
+      color: var(--accent2);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .qr-btn:hover {
+      background: var(--accent2);
+      color: var(--bg);
+    }
+
+    /* ─── MAIN ─── */
+    main {
+      padding: 40px 36px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .round-panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .round-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ─── ROUND HEADER ─── */
+    .round-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+
+    .round-badge {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 5rem;
+      line-height: 1;
+      color: var(--border);
+      min-width: 80px;
+    }
+
+    .round-info h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.4rem;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+
+    .round-info p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 300;
+    }
+
+    .round-tag {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* ─── CODE BLOCK ─── */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .kw {
+      color: #ff79c6;
+    }
+
+    .fn {
+      color: #50fa7b;
+    }
+
+    .str {
+      color: #f1fa8c;
+    }
+
+    .num {
+      color: #bd93f9;
+    }
+
+    .cm {
+      color: #6272a4;
+      font-style: italic;
+    }
+
+    .tag {
+      color: #ff79c6;
+    }
+
+    .attr {
+      color: #50fa7b;
+    }
+
+    .val {
+      color: #f1fa8c;
+    }
+
+    /* ─── QUESTIONS ─── */
+    .questions {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .question-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .question-item:hover {
+      border-color: var(--accent4);
+    }
+
+    .q-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      line-height: 1;
+      color: var(--border);
+      min-width: 36px;
+    }
+
+    .q-body {
+      flex: 1;
+    }
+
+    .q-text {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .reveal-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--accent3);
+      background: transparent;
+      color: var(--accent3);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .reveal-btn:hover {
+      background: var(--accent3);
+      color: var(--bg);
+    }
+
+    .reveal-btn.revealed {
+      background: var(--accent3);
+      color: var(--bg);
+    }
+
+    .answer {
+      display: none;
+      margin-top: 12px;
+      padding: 14px 18px;
+      background: var(--code-bg);
+      border-left: 3px solid var(--accent2);
+      border-radius: 0 8px 8px 0;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      animation: slideIn 0.25s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .answer.visible {
+      display: block;
+    }
+
+    .answer-highlight {
+      color: var(--accent2);
+      font-weight: 700;
+    }
+
+    .answer-note {
+      color: var(--muted);
+      font-size: 0.8rem;
+      display: block;
+      margin-top: 6px;
+    }
+
+    /* ─── GRID ─── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* ─── TIMER ─── */
+    .timer-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 32px;
+      overflow: hidden;
+    }
+
+    .timer-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 1s linear;
+    }
+
+    /* ─── ROUND COLORS ─── */
+    .r1 .round-info h2 {
+      color: var(--accent);
+    }
+
+    .r1 .round-badge {
+      -webkit-text-stroke: 1px #ff3f6c33;
+    }
+
+    .r1 .round-tag {
+      background: #ff3f6c22;
+      color: var(--accent);
+      border: 1px solid #ff3f6c44;
+    }
+
+    .r1 .timer-fill {
+      background: var(--accent);
+    }
+
+    .r2 .round-info h2 {
+      color: var(--accent3);
+    }
+
+    .r2 .round-tag {
+      background: #ffd23f22;
+      color: var(--accent3);
+      border: 1px solid #ffd23f44;
+    }
+
+    .r2 .timer-fill {
+      background: var(--accent3);
+    }
+
+    .r3 .round-info h2 {
+      color: #ff6b6b;
+    }
+
+    .r3 .round-tag {
+      background: #ff6b6b22;
+      color: #ff6b6b;
+      border: 1px solid #ff6b6b44;
+    }
+
+    .r3 .timer-fill {
+      background: #ff6b6b;
+    }
+
+    .r4 .round-info h2 {
+      color: var(--accent4);
+    }
+
+    .r4 .round-tag {
+      background: #a78bfa22;
+      color: var(--accent4);
+      border: 1px solid #a78bfa44;
+    }
+
+    .r4 .timer-fill {
+      background: var(--accent4);
+    }
+
+    .r5 .round-info h2 {
+      color: var(--accent2);
+    }
+
+    .r5 .round-tag {
+      background: #3fefb422;
+      color: var(--accent2);
+      border: 1px solid #3fefb444;
+    }
+
+    .r5 .timer-fill {
+      background: var(--accent2);
+    }
+
+    /* ─── INJECT DEMO ─── */
+    .inject-demo {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .inject-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #1a1a2e;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .inject-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-r {
+      background: #ff5f57;
+    }
+
+    .dot-y {
+      background: #ffbd2e;
+    }
+
+    .dot-g {
+      background: #28c840;
+    }
+
+    .inject-url {
+      flex: 1;
+      background: #0d0d18;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .inject-content {
+      padding: 20px;
+    }
+
+    .inject-input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .inject-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+    }
+
+    .inject-input:focus {
+      border-color: var(--accent4);
+    }
+
+    .inject-go {
+      padding: 10px 20px;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .inject-go:hover {
+      opacity: 0.8;
+    }
+
+    .inject-output {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      min-height: 48px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .inject-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .inject-chip {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .inject-chip:hover {
+      border-color: var(--accent);
+      background: #ff3f6c22;
+    }
+
+    /* ─── CSS BREAK DEMO ─── */
+    .break-demo-container {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .break-demo-nav {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      background: #1e1e2e;
+      border-bottom: 1px solid var(--border);
+      gap: 20px;
+    }
+
+    .break-demo-nav span {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .break-demo-nav span.active-link {
+      color: var(--accent4);
+      border-bottom: 2px solid var(--accent4);
+      padding-bottom: 2px;
+    }
+
+    .break-demo-body {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .break-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 0.85rem;
+    }
+
+    .break-card h4 {
+      color: var(--accent4);
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    .break-card p {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .break-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .break-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid #ff6b6b44;
+      background: #ff6b6b11;
+      color: #ff6b6b;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .break-btn:hover {
+      background: #ff6b6b33;
+    }
+
+    .break-btn.active-break {
+      background: #ff6b6b;
+      color: white;
+    }
+
+    .reset-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--accent2);
+      background: transparent;
+      color: var(--accent2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      background: var(--accent2);
+      color: var(--bg);
+    }
+
+    /* ─── OUTPUT REVEAL ─── */
+    .output-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      margin-top: 12px;
+    }
+
+    .output-line {
+      line-height: 2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .output-line .arrow {
+      color: var(--muted);
+    }
+
+    .output-value {
+      color: var(--accent2);
+      font-weight: 700;
+    }
+
+    .output-hidden {
+      filter: blur(8px);
+      transition: filter 0.4s;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .output-hidden:hover::after {
+      content: ' (click to reveal)';
+      color: var(--muted);
+      font-size: 0.7rem;
+    }
+
+    .output-hidden.shown {
+      filter: none;
+    }
+
+    /* ─── QR MODAL ─── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+    }
+
+    .modal h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      color: var(--accent2);
+    }
+
+    .modal p {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    .qr-placeholder {
+      width: 180px;
+      height: 180px;
+      background: white;
+      border-radius: 12px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #333;
+      font-family: 'Space Mono', monospace;
+      text-align: center;
+      padding: 10px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Crect fill='white' width='180' height='180'/%3E%3Crect fill='%23000' x='10' y='10' width='50' height='50'/%3E%3Crect fill='white' x='20' y='20' width='30' height='30'/%3E%3Crect fill='%23000' x='25' y='25' width='20' height='20'/%3E%3Crect fill='%23000' x='120' y='10' width='50' height='50'/%3E%3Crect fill='white' x='130' y='20' width='30' height='30'/%3E%3Crect fill='%23000' x='135' y='25' width='20' height='20'/%3E%3Crect fill='%23000' x='10' y='120' width='50' height='50'/%3E%3Crect fill='white' x='20' y='130' width='30' height='30'/%3E%3Crect fill='%23000' x='25' y='135' width='20' height='20'/%3E%3Crect fill='%23000' x='75' y='10' width='10' height='10'/%3E%3Crect fill='%23000' x='95' y='10' width='10' height='10'/%3E%3Crect fill='%23000' x='75' y='30' width='10' height='10'/%3E%3Crect fill='%23000' x='85' y='20' width='10' height='10'/%3E%3Crect fill='%23000' x='75' y='75' width='10' height='10'/%3E%3Crect fill='%23000' x='90' y='75' width='10' height='10'/%3E%3Crect fill='%23000' x='105' y='75' width='10' height='10'/%3E%3Crect fill='%23000' x='120' y='75' width='10' height='10'/%3E%3Crect fill='%23000' x='135' y='75' width='10' height='10'/%3E%3Crect fill='%23000' x='75' y='90' width='10' height='10'/%3E%3Crect fill='%23000' x='105' y='90' width='10' height='10'/%3E%3Crect fill='%23000' x='150' y='90' width='10' height='10'/%3E%3Crect fill='%23000' x='75' y='105' width='10' height='10'/%3E%3Crect fill='%23000' x='90' y='105' width='10' height='10'/%3E%3Crect fill='%23000' x='120' y='105' width='10' height='10'/%3E%3Crect fill='%23000' x='140' y='105' width='10' height='10'/%3E%3Crect fill='%23000' x='75' y='120' width='10' height='10'/%3E%3Crect fill='%23000' x='95' y='120' width='10' height='10'/%3E%3Crect fill='%23000' x='110' y='120' width='10' height='10'/%3E%3Crect fill='%23000' x='130' y='120' width='10' height='10'/%3E%3Crect fill='%23000' x='155' y='120' width='10' height='10'/%3E%3Crect fill='%23000' x='75' y='135' width='10' height='10'/%3E%3Crect fill='%23000' x='100' y='135' width='10' height='10'/%3E%3Crect fill='%23000' x='120' y='135' width='10' height='10'/%3E%3Crect fill='%23000' x='145' y='135' width='10' height='10'/%3E%3Crect fill='%23000' x='75' y='150' width='10' height='10'/%3E%3Crect fill='%23000' x='90' y='150' width='10' height='10'/%3E%3Crect fill='%23000' x='110' y='150' width='10' height='10'/%3E%3Crect fill='%23000' x='130' y='150' width='10' height='10'/%3E%3Crect fill='%23000' x='150' y='150' width='10' height='10'/%3E%3C/svg%3E");
+    }
+
+    .modal-url {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent2);
+      background: var(--code-bg);
+      padding: 8px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .modal-close {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      padding: 10px 24px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    /* ─── TIMER CONTROLS ─── */
+    .timer-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .timer-display {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      color: var(--text);
+      min-width: 80px;
+    }
+
+    .timer-ctrl-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .timer-ctrl-btn:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .timer-ctrl-btn.start {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .timer-ctrl-btn.start:hover {
+      background: var(--accent2);
+      color: var(--bg);
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+
+      .two-col,
+      .three-col {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .round-tabs {
+        flex-wrap: wrap;
+      }
+    }
+
+    .codepen-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: 1px solid var(--accent3);
+      background: #ffd23f11;
+      color: var(--accent3);
+      text-decoration: none;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+
+    .codepen-link:hover {
+      background: var(--accent3);
+      color: var(--bg);
+    }
+
+    .tag-html {
+      background: #ff3f6c22;
+      color: var(--accent);
+      border: 1px solid #ff3f6c44;
+    }
+
+    .tag-css {
+      background: #ffd23f22;
+      color: var(--accent3);
+      border: 1px solid #ffd23f44;
+    }
+
+    .tag-js {
+      background: #3fefb422;
+      color: var(--accent2);
+      border: 1px solid #3fefb444;
+    }
+
+    .tag-xss {
+      background: #ff6b6b22;
+      color: #ff6b6b;
+      border: 1px solid #ff6b6b44;
+    }
+
+    .twist-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: #a78bfa22;
+      border: 1px solid #a78bfa44;
+      color: var(--accent4);
+      letter-spacing: 1px;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Time's Up Modal -->
+  <div class="modal-overlay" id="timesUpModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal" style="text-align:center;">
+      <div style="font-size:3rem; margin-bottom:12px;">⏰</div>
+      <h3
+        style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; letter-spacing:3px; color:var(--accent); -webkit-text-fill-color:var(--accent);">
+        TIME'S UP!</h3>
+      <p style="margin:12px 0 24px;">Stop writing — pencils down!</p>
+      <button class="modal-close"
+        onclick="document.getElementById('timesUpModal').classList.remove('open')">DISMISS</button>
+    </div>
+  </div>
+
+
+  <div class="modal-overlay" id="qrModal">
+    <div class="modal">
+      <h3>Student Answer Page</h3>
+      <p>Students scan this QR or open the link on their device to submit answers</p>
+      <div class="qr-placeholder"></div>
+      <div class="modal-url">student.html</div>
+      <button class="modal-close" onclick="document.getElementById('qrModal').classList.remove('open')">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">Code &amp; Chaos</div>
+    <div class="round-tabs">
+      <button class="tab active" onclick="showRound(1)">R1 · HTML</button>
+      <button class="tab" onclick="showRound(2)">R2 · CSS</button>
+      <button class="tab" onclick="showRound(3)">R3 · BREAK</button>
+      <button class="tab" onclick="showRound(4)">R4 · BATTLE</button>
+      <button class="tab" onclick="showRound(5)">R5 · JS</button>
+    </div>
+    <button class="qr-btn" onclick="document.getElementById('qrModal').classList.add('open')">📱 SHOW QR</button>
+  </header>
+
+  <main>
+
+    <!-- ══════════════════════════════════════
+     ROUND 1 — The Human Compiler
+══════════════════════════════════════ -->
+    <div class="round-panel r1 active" id="round-1">
+      <div class="round-header">
+        <div class="round-badge">01</div>
+        <div class="round-info">
+          <div class="round-tag tag-html">HTML · DOM STRUCTURE</div>
+          <h2>The Human Compiler</h2>
+          <p>Students look at the code — sketch what they think the browser renders. Then reveal surprises one by one.
+          </p>
+        </div>
+      </div>
+
+      <div class="timer-controls">
+        <div class="timer-display" id="timer-1">1:00</div>
+        <button class="timer-ctrl-btn start" onclick="startTimer(1, 60)">▶ START</button>
+        <button class="timer-ctrl-btn" onclick="resetTimer(1, 60)">↺ RESET</button>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="card">
+            <div class="card-label">// Code shown on smartboard</div>
+            <pre><span class="cm">&lt;!-- Students: what does this render? --&gt;</span>
+<span class="tag">&lt;section&gt;</span>
+  <span class="tag">&lt;div&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;img /&gt;</span>
+    <span class="tag">&lt;p&gt;&lt;/p&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">disabled</span><span class="tag">&gt;</span>Click Me<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/section&gt;</span>
+<span class="tag">&lt;footer&gt;</span>
+  <span class="tag">&lt;span&gt;</span>
+    Done
+    <span class="tag">&lt;div&gt;</span>I am inside a span<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/footer&gt;</span></pre>
+          </div>
+        </div>
+
+        <div class="questions">
+          <div class="question-item">
+            <div class="q-num">Q1</div>
+            <div class="q-body">
+              <div class="q-text">How many visible things actually appear on screen?</div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL ANSWER</button>
+              <div class="answer">
+                <span class="answer-highlight">3 things:</span> "Hello" (h1) + "Click Me" button (greyed out) + "Done"
+                text.<br />
+                <span class="answer-note">→ Empty &lt;p&gt; renders nothing. &lt;img&gt; with no src shows a broken icon
+                  in some browsers, nothing in others.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="question-item">
+            <div class="q-num">Q2</div>
+            <div class="q-body">
+              <div class="q-text">Can the user click the button? Does it still exist in the DOM? <span
+                  class="twist-badge">⚡ TWIST</span></div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL ANSWER</button>
+              <div class="answer">
+                <span class="answer-highlight">No click allowed</span> — disabled attribute blocks interaction.<br />
+                <span class="answer-highlight">Yes</span> — it absolutely exists in the DOM. You can still select it
+                with JavaScript.<br />
+                <span class="answer-note">→ disabled ≠ removed. It's just non-interactive.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="question-item">
+            <div class="q-num">Q3</div>
+            <div class="q-body">
+              <div class="q-text">Is this HTML valid? Find the illegal nesting. <span class="twist-badge">⚡ TWIST</span>
+              </div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL ANSWER</button>
+              <div class="answer">
+                <span class="answer-highlight">Invalid!</span> A &lt;div&gt; is inside a &lt;span&gt;.<br />
+                <span class="answer-note">→ &lt;span&gt; is inline — it cannot contain block-level elements like
+                  &lt;div&gt;.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="question-item">
+            <div class="q-num">Q4</div>
+            <div class="q-body">
+              <div class="q-text">What does the browser actually do with the &lt;div&gt; inside the &lt;span&gt;? <span
+                  class="twist-badge">⚡ TWIST</span></div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL ANSWER</button>
+              <div class="answer">
+                <span class="answer-highlight">Auto-corrects it silently.</span> The browser pushes the &lt;div&gt;
+                outside the &lt;span&gt; and closes the &lt;span&gt; early.<br />
+                <span class="answer-note">→ The rendered DOM looks completely different from the written HTML. This is
+                  why valid HTML matters — browsers guess, and they don't always guess right.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+     ROUND 2 — CSS Superpower Demo
+══════════════════════════════════════ -->
+    <div class="round-panel r2" id="round-2">
+      <div class="round-header">
+        <div class="round-badge">02</div>
+        <div class="round-info">
+          <div class="round-tag tag-css">CSS · BUILD CHALLENGE</div>
+          <h2>CSS Superpower Demo</h2>
+          <p>HTML is locked. Students write CSS only in CodePen to match the target. Project their pens on the
+            smartboard — class votes closest match.</p>
+        </div>
+      </div>
+
+      <div class="timer-controls">
+        <div class="timer-display" id="timer-2">1:00</div>
+        <button class="timer-ctrl-btn start" onclick="startTimer(2, 60)">▶ START</button>
+        <button class="timer-ctrl-btn" onclick="resetTimer(2, 60)">↺ RESET</button>
+        <a class="codepen-link" href="https://codepen.io/pen" target="_blank">⬡ OPEN CODEPEN</a>
+      </div>
+
+      <!-- Challenge 1 -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-label">// Challenge 1 — The Navbar</div>
+        <div class="two-col" style="gap:24px; align-items:start;">
+          <div>
+            <pre><span class="tag">&lt;nav&gt;</span>
+  <span class="tag">&lt;a&gt;</span>Home<span class="tag">&lt;/a&gt;</span>
+  <span class="tag">&lt;a&gt;</span>About<span class="tag">&lt;/a&gt;</span>
+  <span class="tag">&lt;a&gt;</span>Contact<span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;/nav&gt;</span></pre>
+          </div>
+          <div style="background:var(--code-bg); border-radius:8px; padding:16px;">
+            <div style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--muted); margin-bottom:10px;">
+              // TARGET OUTPUT</div>
+            <div
+              style="background:#1a1a2e; border-radius:6px; padding:14px 20px; display:flex; justify-content:space-between; align-items:center;">
+              <a
+                style="color:white; text-decoration:none; font-size:0.9rem; padding-bottom:3px; border-bottom:2px solid #a78bfa; font-family:'DM Sans',sans-serif;">Home</a>
+              <a style="color:#aaa; text-decoration:none; font-size:0.9rem; font-family:'DM Sans',sans-serif;">About</a>
+              <a
+                style="color:#aaa; text-decoration:none; font-size:0.9rem; font-family:'DM Sans',sans-serif;">Contact</a>
+            </div>
+          </div>
+        </div>
+        <div class="questions" style="margin-top:20px;">
+          <div class="question-item">
+            <div class="q-num">Q1</div>
+            <div class="q-body">
+              <div class="q-text">Make the links horizontal and evenly spaced — which property goes on the nav?</div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL</button>
+              <div class="answer"><span class="answer-highlight">display: flex; justify-content:
+                  space-between;</span><span class="answer-note">→ flex makes children horizontal by default.
+                  space-between pushes them to opposite edges with equal gap.</span></div>
+            </div>
+          </div>
+          <div class="question-item">
+            <div class="q-num">Q2</div>
+            <div class="q-body">
+              <div class="q-text">Remove underline from all links — one property? <span class="twist-badge">⚡
+                  TWIST</span></div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL</button>
+              <div class="answer"><span class="answer-highlight">text-decoration: none;</span><span
+                  class="answer-note">→ Links have text-decoration: underline by default from the browser stylesheet.
+                  You have to explicitly remove it.</span></div>
+            </div>
+          </div>
+          <div class="question-item">
+            <div class="q-num">Q3</div>
+            <div class="q-body">
+              <div class="q-text">Only the active link has a bottom border. Can you just use border? <span
+                  class="twist-badge">⚡ TWIST</span></div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL</button>
+              <div class="answer"><span class="answer-highlight">border-bottom: 2px solid white;</span><br />Not just
+                border — that adds borders on all 4 sides.<span class="answer-note">→ border-bottom targets only the
+                  bottom edge. border is shorthand for all sides.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+     ROUND 3 — Break My Website
+══════════════════════════════════════ -->
+    <div class="round-panel r3" id="round-3">
+      <div class="round-header">
+        <div class="round-badge">03</div>
+        <div class="round-info">
+          <div class="round-tag tag-xss">XSS · CSS CHAOS</div>
+          <h2>Break My Website</h2>
+          <p>Two sections — first students inject code into an input to break it. Then you break CSS live one by one.
+          </p>
+        </div>
+      </div>
+
+      <div class="timer-controls">
+        <div class="timer-display" id="timer-3">1:00</div>
+        <button class="timer-ctrl-btn start" onclick="startTimer(3, 60)">▶ START</button>
+        <button class="timer-ctrl-btn" onclick="resetTimer(3, 60)">↺ RESET</button>
+      </div>
+
+      <!-- Break 1: XSS -->
+      <div class="card" style="margin-bottom:20px; border-color:#ff6b6b44;">
+        <div class="card-label" style="color:#ff6b6b;">// BREAK 1 — Input Injection (XSS)</div>
+
+        <div class="two-col" style="gap:24px; align-items:start; margin-bottom:20px;">
+          <pre><span class="kw">function</span> <span class="fn">search</span>() {
+  <span class="kw">let</span> val = document
+    .getElementById(<span class="str">'search'</span>).value;
+
+  document.getElementById(<span class="str">'output'</span>)
+    .innerHTML = <span class="str">"You searched: "</span> + val;
+}</pre>
+          <div>
+            <div class="inject-demo">
+              <div class="inject-bar">
+                <div class="inject-dot dot-r"></div>
+                <div class="inject-dot dot-y"></div>
+                <div class="inject-dot dot-g"></div>
+                <div class="inject-url">localhost:3000/search</div>
+              </div>
+              <div class="inject-content">
+                <div class="inject-input-row">
+                  <input class="inject-input" id="injectInput" placeholder="Search anything..." />
+                  <button class="inject-go" onclick="runInjection()">Go</button>
+                </div>
+                <div class="inject-output" id="injectOutput">Results will appear here...</div>
+                <div class="inject-chips">
+                  <div class="inject-chip" onclick="setInjection(this, `&lt;h1&gt;HACKED&lt;/h1&gt;`)">💉 Inject 1</div>
+                  <div class="inject-chip"
+                    onclick="setInjection(this, `&lt;img src=&quot;x&quot; onerror=&quot;document.getElementById('injectOutput').style.background='red';document.getElementById('injectOutput').innerHTML='YOU GOT HACKED'&quot; /&gt;`)">
+                    💉 Inject 2</div>
+                  <div class="inject-chip"
+                    onclick="setInjection(this, `&lt;form&gt;Password: &lt;input type=&quot;password&quot;/&gt;&lt;/form&gt;`)">
+                    💉 Inject 3</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="questions">
+          <div class="question-item">
+            <div class="q-num">💉1</div>
+            <div class="q-body">
+              <div class="q-text">Type <code
+                  style="background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:'Space Mono',monospace;">&lt;h1&gt;HACKED&lt;/h1&gt;</code>
+                — what happens and why?</div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL</button>
+              <div class="answer"><span class="answer-highlight">A giant H1 renders on the page.</span><span
+                  class="answer-note">→ innerHTML treats the input as actual HTML and parses it. It doesn't escape
+                  anything.</span></div>
+            </div>
+          </div>
+          <div class="question-item">
+            <div class="q-num">💉2</div>
+            <div class="q-body">
+              <div class="q-text">The img injection runs JavaScript — what triggered it?</div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL</button>
+              <div class="answer"><span class="answer-highlight">onerror event handler.</span> src="x" fails, browser
+                fires onerror, which runs arbitrary JS.<span class="answer-note">→ You don't need &lt;script&gt; to run
+                  JS. Event attributes are execution vectors too.</span></div>
+            </div>
+          </div>
+          <div class="question-item">
+            <div class="q-num">💉3</div>
+            <div class="q-body">
+              <div class="q-text">What's the real-world danger of injecting a password input into a real page? <span
+                  class="twist-badge">⚡ TWIST</span></div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL</button>
+              <div class="answer"><span class="answer-highlight">Phishing.</span> The user thinks they're on a trusted
+                site and types their real password into a fake field controlled by an attacker.<span
+                  class="answer-note">→ This is exactly how stored XSS attacks work on real websites.</span></div>
+            </div>
+          </div>
+          <div class="question-item">
+            <div class="q-num">🔧</div>
+            <div class="q-body">
+              <div class="q-text">One word change in the code makes ALL three injections harmless. What is it?</div>
+              <button class="reveal-btn" onclick="revealAnswer(this)">REVEAL</button>
+              <div class="answer">Change <span class="answer-highlight">innerHTML</span> → <span
+                  class="answer-highlight">textContent</span><span class="answer-note">→ textContent treats everything
+                  as plain text. HTML tags are displayed as literal characters, not parsed.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+     ROUND 4 — JS Chaos Challenges
+══════════════════════════════════════ -->
+    <div class="round-panel r4" id="round-4">
+      <div class="round-header">
+        <div class="round-badge">04</div>
+        <div class="round-info">
+          <div class="round-tag tag-js">JS · CHAOS CHALLENGES</div>
+          <h2>JS Chaos Challenges</h2>
+          <p>Read the code — predict the output before running. Click each output to unblur the answer, then hit
+            EXPLAIN.</p>
+        </div>
+      </div>
+
+      <div class="timer-controls">
+        <div class="timer-display" id="timer-4">1:00</div>
+        <button class="timer-ctrl-btn start" onclick="startTimer(4, 60)">▶ START</button>
+        <button class="timer-ctrl-btn" onclick="resetTimer(4, 60)">↺ RESET</button>
+      </div>
+
+      <!-- Q1 -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-label">// Question 1 — Score Tracker (Type Coercion)</div>
+        <div class="two-col" style="gap:24px; align-items:start;">
+          <pre style="font-size:0.82rem;"><span class="tag">&lt;input</span> <span class="attr">id</span>=<span class="val">"num"</span> <span class="attr">placeholder</span>=<span class="val">"Enter a number"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">onclick</span>=<span class="val">"play()"</span><span class="tag">&gt;</span>Play<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;p</span> <span class="attr">id</span>=<span class="val">"out"</span><span class="tag">&gt;&lt;/p&gt;</span>
+<span class="tag">&lt;script&gt;</span>
+  <span class="kw">let</span> score = <span class="num">1</span>;
+  <span class="kw">function</span> <span class="fn">play</span>() {
+    <span class="kw">let</span> val = document.<span class="fn">getElementById</span>(<span class="str">"num"</span>).value;
+    score += val;
+    document.<span class="fn">getElementById</span>(<span class="str">"out"</span>).textContent = score;
+  }
+<span class="tag">&lt;/script&gt;</span></pre>
+          <div>
+            <div style="margin:0 0 8px; font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--muted);">What
+              will be the output if input is 10?</div>
+            <div class="output-box">
+              <div class="output-line"><span class="arrow">›</span><span class="output-value output-hidden"
+                  onclick="this.classList.toggle('shown')">110</span></div>
+            </div>
+            <button class="reveal-btn" style="margin-top:12px;" onclick="revealAnswer(this)">EXPLAIN</button>
+            <div class="answer"><span class="answer-highlight">String concatenation!</span> <code>.value</code> always
+              returns a string. <code>score</code> starts at <code>1</code> (number), so <code>1 + "10"</code> =
+              <code>"110"</code> — not 11!<span class="answer-note">→ Fix: wrap with Number(val) or parseInt(val). The
+                classic type coercion trap.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-label">// Question 2 — Object Reference</div>
+        <div class="two-col" style="gap:24px; align-items:start;">
+          <pre style="font-size:0.82rem;"><span class="kw">let</span> a = { value: <span class="num">10</span> };
+<span class="kw">let</span> b = a;
+a = { value: <span class="num">20</span> };
+console.<span class="fn">log</span>(b.value);</pre>
+          <div>
+            <div style="margin:0 0 8px; font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--muted);">
+              OUTPUT:</div>
+            <div class="output-box">
+              <div class="output-line"><span class="arrow">›</span><span class="output-value output-hidden"
+                  onclick="this.classList.toggle('shown')">10</span></div>
+            </div>
+            <button class="reveal-btn" style="margin-top:12px;" onclick="revealAnswer(this)">EXPLAIN</button>
+            <div class="answer"><span class="answer-highlight">b still points to the original object.</span>
+              <code>b = a</code> copies the reference, not the value. Reassigning <code>a</code> to a new object doesn't
+              affect <code>b</code> at all.<span class="answer-note">→ Reference vs value — b is still locked to {
+                value: 10 }.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 removed -->
+      <!-- Q4 removed -->
+
+      <!-- Q5 -->
+      <div class="card">
+        <div class="card-label">// Question 3 — Recursion Trace</div>
+        <div class="two-col" style="gap:24px; align-items:start;">
+          <pre style="font-size:0.82rem;"><span class="tag">&lt;button</span> <span class="attr">onclick</span>=<span class="val">"run()"</span><span class="tag">&gt;</span>Run<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;script&gt;</span>
+  <span class="kw">function</span> <span class="fn">run</span>() {
+    <span class="kw">function</span> <span class="fn">f</span>(n) {
+      <span class="kw">if</span> (n &gt; <span class="num">3</span>) <span class="kw">return</span> n;
+      <span class="kw">return</span> <span class="fn">f</span>(n + <span class="num">1</span>);
+    }
+    console.<span class="fn">log</span>(<span class="fn">f</span>(<span class="num">1</span>));
+  }
+<span class="tag">&lt;/script&gt;</span></pre>
+          <div>
+            <div style="margin:0 0 8px; font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--muted);">
+              OUTPUT:</div>
+            <div class="output-box">
+              <div class="output-line"><span class="arrow">›</span><span class="output-value output-hidden"
+                  onclick="this.classList.toggle('shown')">4</span></div>
+            </div>
+            <button class="reveal-btn" style="margin-top:12px;" onclick="revealAnswer(this)">EXPLAIN</button>
+            <div class="answer"><span class="answer-highlight">f(1) → f(2) → f(3) → f(4).</span> When n=4,
+              <code>n &gt; 3</code> is true, returns 4. That value bubbles all the way back up.<span
+                class="answer-note">→ Trace it step by step: each call waits for the next until the base case
+                hits.</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+     ROUND 5 — Guess the Output (JS)
+══════════════════════════════════════ -->
+    <div class="round-panel r5" id="round-5">
+      <div class="round-header">
+        <div class="round-badge">05</div>
+        <div class="round-info">
+          <div class="round-tag tag-js">JS · GUESS THE OUTPUT</div>
+          <h2>Guess the Output</h2>
+          <p>Students submit answers via QR before you reveal. Click each output line to unblur the answer.</p>
+        </div>
+      </div>
+
+      <div class="timer-controls">
+        <div class="timer-display" id="timer-5">1:00</div>
+        <button class="timer-ctrl-btn start" onclick="startTimerR5()">▶ START</button>
+        <button class="timer-ctrl-btn" onclick="resetTimer(5, 60)">↺ RESET</button>
+      </div>
+
+      <div class="three-col">
+
+        <!-- Q1 -->
+        <div class="card">
+          <div class="card-label">// Question 1 — ASI Trap</div>
+          <pre style="font-size:0.82rem;"><span class="kw">function</span> <span class="fn">foo</span>() {
+  <span class="kw">return</span>
+  {
+    value: <span class="num">42</span>
+  }
+}
+console.<span class="fn">log</span>(<span class="fn">foo</span>());</pre>
+          <div style="margin:16px 0 8px; font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--muted);">
+            OUTPUT:</div>
+          <div class="output-box">
+            <div class="output-line">
+              <span class="arrow">›</span>
+              <span class="output-value output-hidden" onclick="this.classList.toggle('shown')">undefined</span>
+            </div>
+          </div>
+          <button class="reveal-btn" style="margin-top:12px;" onclick="revealAnswer(this)">EXPLAIN</button>
+          <div class="answer">JS inserts a semicolon after <span class="answer-highlight">return</span> because of the
+            newline — Automatic Semicolon Insertion. The object literal below it is never reached.<span
+              class="answer-note">→ Fix: put the opening brace on the same line as return.</span></div>
+        </div>
+
+        <!-- Q2 removed -->
+        <!-- Q3 removed -->
+
+        <!-- Q4 -->
+        <div class="card">
+          <div class="card-label">// Question 2 — Closure Loop</div>
+          <pre style="font-size:0.82rem;"><span class="kw">const</span> funcs = [];
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {
+  funcs.push(() =&gt; i * i);
+}
+console.<span class="fn">log</span>(
+  funcs[<span class="num">0</span>](), funcs[<span class="num">1</span>](), funcs[<span class="num">2</span>]()
+);
+
+<span class="cm">// Now change let → var. Output?</span></pre>
+          <div style="margin:16px 0 8px; font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--muted);">
+            OUTPUT (let vs var):</div>
+          <div class="output-box">
+            <div class="output-line"><span class="arrow">let →</span><span class="output-value output-hidden"
+                onclick="this.classList.toggle('shown')">0 1 4</span></div>
+            <div class="output-line"><span class="arrow">var →</span><span class="output-value output-hidden"
+                onclick="this.classList.toggle('shown')">9 9 9</span></div>
+          </div>
+          <button class="reveal-btn" style="margin-top:12px;" onclick="revealAnswer(this)">EXPLAIN</button>
+          <div class="answer"><span class="answer-highlight">let</span> creates a new binding per iteration — each
+            closure captures its own i. <span class="answer-highlight">var</span> is one shared i across all iterations.
+            By the time functions run, var i is already 3, so 3×3=9.<span class="answer-note">→ This is the classic
+              closure-in-loop trap. let fixes it.</span></div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="card">
+          <div class="card-label">// Question 3 — Array Holes + Coercion</div>
+          <pre style="font-size:0.82rem;">console.<span class="fn">log</span>([<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>] + [<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]);
+
+<span class="kw">const</span> arr = [<span class="num">1</span>, , , <span class="num">4</span>];
+
+console.<span class="fn">log</span>(arr.length);
+console.<span class="fn">log</span>(arr[<span class="num">1</span>]);
+console.<span class="fn">log</span>(<span class="num">1</span> <span class="kw">in</span> arr);
+console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">in</span> arr);</pre>
+          <div style="margin:16px 0 8px; font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--muted);">
+            OUTPUT:</div>
+          <div class="output-box">
+            <div class="output-line"><span class="arrow">›</span><span class="output-value output-hidden"
+                onclick="this.classList.toggle('shown')">"1,2,34,5,6"</span></div>
+            <div class="output-line"><span class="arrow">›</span><span class="output-value output-hidden"
+                onclick="this.classList.toggle('shown')">4</span></div>
+            <div class="output-line"><span class="arrow">›</span><span class="output-value output-hidden"
+                onclick="this.classList.toggle('shown')">undefined</span></div>
+            <div class="output-line"><span class="arrow">›</span><span class="output-value output-hidden"
+                onclick="this.classList.toggle('shown')">false</span></div>
+            <div class="output-line"><span class="arrow">›</span><span class="output-value output-hidden"
+                onclick="this.classList.toggle('shown')">true</span></div>
+          </div>
+          <button class="reveal-btn" style="margin-top:12px;" onclick="revealAnswer(this)">EXPLAIN</button>
+          <div class="answer"><span class="answer-highlight">[1,2,3]+[4,5,6]</span> → arrays coerce to strings first:
+            <span class="answer-highlight">"1,2,3"+"4,5,6"</span> = string concat, not math! Then for arr holes: <span
+              class="answer-highlight">arr[1]</span> is undefined but <span class="answer-highlight">1 in arr</span> is
+            false — the slot doesn't exist at all. Length tracks highest index+1, index 3 (value 4) does exist so <span
+              class="answer-highlight">3 in arr</span> is true.<span class="answer-note">→ Two of JS's darkest corners
+              in one card: type coercion and array holes.</span></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ── ROUND SWITCHING ──
+    function showRound(n) {
+      document.querySelectorAll('.round-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('round-' + n).classList.add('active');
+      document.querySelectorAll('.tab')[n - 1].classList.add('active');
+    }
+
+    // ── REVEAL ANSWERS ──
+    function revealAnswer(btn) {
+      const answer = btn.nextElementSibling;
+      answer.classList.toggle('visible');
+      btn.classList.toggle('revealed');
+      btn.textContent = answer.classList.contains('visible') ? 'HIDE' : (btn.dataset.label || btn.textContent.replace('HIDE', 'REVEAL'));
+    }
+
+    // ── TIMERS ──
+    const timers = {};
+
+    function formatTime(s) {
+      return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+
+    function startTimer(id, duration) {
+      if (timers[id]) { clearInterval(timers[id]); delete timers[id]; }
+      let remaining = duration;
+      const display = document.getElementById('timer-' + id);
+      display.textContent = formatTime(remaining);
+      display.style.color = 'var(--text)';
+      timers[id] = setInterval(() => {
+        remaining--;
+        display.textContent = formatTime(remaining);
+        if (remaining <= 10) display.style.color = 'var(--accent)';
+        if (remaining <= 0) {
+          clearInterval(timers[id]);
+          delete timers[id];
+          display.textContent = 'TIME!';
+          document.getElementById('timesUpModal').classList.add('open');
+        }
+      }, 1000);
+    }
+
+    function resetTimer(id, duration) {
+      if (timers[id]) { clearInterval(timers[id]); delete timers[id]; }
+      const display = document.getElementById('timer-' + id);
+      display.textContent = formatTime(duration);
+      display.style.color = 'var(--text)';
+    }
+
+    // ── R5 TIMER WITH POPUP ──
+    function startTimerR5() { startTimer(5, 60); }
+
+    // ── INJECTION DEMO ──
+    function setInjection(chip, payload) {
+      document.getElementById('injectInput').value = payload;
+    }
+
+    function runInjection() {
+      const val = document.getElementById('injectInput').value;
+      document.getElementById('injectOutput').innerHTML = 'You searched: ' + val;
+    }
+
+    // ── CSS BREAKS ──
+    const breakStyles = {
+      1: { target: 'breakContainer', style: 'fontSize', value: '0px', label: 'font-size: 0' },
+      2: { target: 'breakBody', style: 'boxSizing', value: 'content-box', label: 'box-sizing: content-box' },
+      3: { target: 'breakContainer', style: 'transform', value: 'scale(-1)', label: 'transform: scale(-1)' },
+      4: { target: 'breakContainer', style: 'pointerEvents', value: 'none', label: 'pointer-events: none' },
+    };
+
+    const breakOriginals = {};
+
+    function applyBreak(btn, id) {
+      const b = breakStyles[id];
+      const el = document.getElementById(b.target);
+      if (!breakOriginals[id]) breakOriginals[id] = el.style[b.style] || '';
+      el.style[b.style] = b.value;
+      btn.classList.add('active-break');
+    }
+
+    function resetBreaks() {
+      Object.keys(breakStyles).forEach(id => {
+        const b = breakStyles[id];
+        const el = document.getElementById(b.target);
+        el.style[b.style] = breakOriginals[id] || '';
+      });
+      document.querySelectorAll('.break-btn').forEach(b => b.classList.remove('active-break'));
+    }
+  </script>
+</body>
+
+</html>

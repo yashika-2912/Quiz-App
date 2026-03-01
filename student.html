@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Code & Chaos — Student</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a26;
+    --border: #2a2a3a;
+    --accent: #ff3f6c;
+    --accent2: #3fefb4;
+    --accent3: #ffd23f;
+    --accent4: #a78bfa;
+    --text: #f0f0f8;
+    --muted: #6b6b8a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent4));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  main {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px 14px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── NAME ─── */
+  .name-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .name-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .name-input:focus { border-color: var(--accent4); }
+  .name-input::placeholder { color: var(--muted); }
+
+  /* ─── PROGRESS ─── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent4), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ─── ROUND TABS ─── */
+  .round-selector {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .round-sel-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    padding: 10px 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .round-sel-btn .rlabel {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.45rem;
+    letter-spacing: 1px;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  .round-sel-btn.r1.active { background: #ff3f6c22; border-color: var(--accent); color: var(--accent); }
+  .round-sel-btn.r2.active { background: #ffd23f22; border-color: var(--accent3); color: var(--accent3); }
+  .round-sel-btn.r3.active { background: #ff6b6b22; border-color: #ff6b6b; color: #ff6b6b; }
+  .round-sel-btn.r4.active { background: #a78bfa22; border-color: var(--accent4); color: var(--accent4); }
+  .round-sel-btn.r5.active { background: #3fefb422; border-color: var(--accent2); color: var(--accent2); }
+  .round-sel-btn.done-round { opacity: 0.5; }
+  .round-sel-btn.done-round::after { content: '✓'; display: block; font-size: 0.65rem; color: var(--accent2); }
+
+  /* ─── PANELS ─── */
+  .q-panel { display: none; }
+  .q-panel.active { display: block; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ─── QUESTION CARD ─── */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+
+  .q-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .q-title {
+    font-weight: 600;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  .q-code {
+    background: #0d0d18;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.75;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* ─── OPTIONS ─── */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    user-select: none;
+  }
+  .option:active { transform: scale(0.98); }
+  .option.selected { border-color: var(--accent4); background: #a78bfa18; }
+  .option.selected .opt-key { background: var(--accent4); color: var(--bg); }
+
+  .opt-key {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.18s;
+  }
+
+  /* ─── SUBMIT ─── */
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 14px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .submit-btn:active { transform: scale(0.98); }
+  .r1-btn { background: var(--accent); color: white; }
+  .r2-btn { background: var(--accent3); color: var(--bg); }
+  .r3-btn { background: #ff6b6b; color: white; }
+  .r4-btn { background: var(--accent4); color: white; }
+  .r5-btn { background: var(--accent2); color: var(--bg); }
+
+  /* ─── TOAST ─── */
+  .success-toast {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent2);
+    color: var(--bg);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    padding: 11px 22px;
+    border-radius: 8px;
+    letter-spacing: 1px;
+    z-index: 200;
+    white-space: nowrap;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateX(-50%) translateY(16px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+
+  /* ─── SCOREBOARD ─── */
+  .scoreboard {
+    display: none;
+    animation: fadeUp 0.5s ease;
+  }
+
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--accent2);
+    border-radius: 16px;
+    padding: 28px 20px 24px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .score-card h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+    color: var(--accent2);
+    margin-bottom: 6px;
+  }
+
+  .score-big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5.5rem;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent4), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 12px 0 4px;
+  }
+
+  .score-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 18px;
+  }
+
+  .score-message {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Per-round breakdown */
+  .breakdown {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .breakdown-header {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+
+  .breakdown-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+
+  .breakdown-round {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .breakdown-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+
+  .breakdown-dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .dot.correct { background: var(--accent2); }
+  .dot.wrong   { background: var(--accent); }
+  .dot.skip    { background: var(--border); }
+
+  /* ─── SYNTAX COLORS ─── */
+  .kw  { color: #ff79c6; }
+  .fn  { color: #50fa7b; }
+  .str { color: #f1fa8c; }
+  .num { color: #bd93f9; }
+  .cm  { color: #6272a4; }
+  .tag { color: #ff79c6; }
+  .attr{ color: #50fa7b; }
+  .val { color: #f1fa8c; }
+</style>
+</head>
+<body>
+
+<div class="success-toast" id="toast">✓ ROUND SUBMITTED</div>
+
+<header>
+  <div class="logo">Code &amp; Chaos</div>
+  <div class="subtitle">Student Answer Page</div>
+</header>
+
+<main>
+
+  <!-- Name -->
+  <div class="name-section">
+    <div class="section-label">// YOUR NAME</div>
+    <input class="name-input" id="studentName" placeholder="Type your name..." autocomplete="off" />
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- Round Tabs -->
+  <div class="round-selector">
+    <button class="round-sel-btn r1 active" onclick="switchRound(1)">R1<span class="rlabel">HTML</span></button>
+    <button class="round-sel-btn r2"        onclick="switchRound(2)">R2<span class="rlabel">CSS</span></button>
+    <button class="round-sel-btn r3"        onclick="switchRound(3)">R3<span class="rlabel">BREAK</span></button>
+    <button class="round-sel-btn r4"        onclick="switchRound(4)">R4<span class="rlabel">JS</span></button>
+    <button class="round-sel-btn r5"        onclick="switchRound(5)">R5<span class="rlabel">OUTPUT</span></button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ROUND 1 — The Human Compiler
+  ══════════════════════════════════════ -->
+  <div class="q-panel active" id="qp-1">
+
+    <div class="q-card">
+      <div class="q-number">R1 · Q1 — DOM Structure</div>
+      <div class="q-title">How many visible things actually render on screen from this HTML snippet?</div>
+      <div class="q-code">&lt;section&gt;
+  &lt;div&gt;
+    &lt;h1&gt;Hello&lt;/h1&gt;
+    &lt;img /&gt;
+    &lt;p&gt;&lt;/p&gt;
+    &lt;button disabled&gt;Click Me&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+&lt;footer&gt;
+  &lt;span&gt;
+    Done
+    &lt;div&gt;I am inside a span&lt;/div&gt;
+  &lt;/span&gt;
+&lt;/footer&gt;</div>
+      <div class="options">
+        <div class="option" data-q="r1q1" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>2 things: Hello + Done only</div>
+        <div class="option" data-q="r1q1" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>3 things: Hello, Click Me (greyed), Done</div>
+        <div class="option" data-q="r1q1" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>5 things including the empty &lt;p&gt; and broken img</div>
+        <div class="option" data-q="r1q1" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>4 things: the button counts twice because it has an attribute</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R1 · Q2 — DOM</div>
+      <div class="q-title">The &lt;button disabled&gt; is not clickable. Can JavaScript still find and read it in the DOM?</div>
+      <div class="options">
+        <div class="option" data-q="r1q2" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>No — disabled removes the element from the DOM entirely</div>
+        <div class="option" data-q="r1q2" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>Yes — it's in the DOM, just non-interactive</div>
+        <div class="option" data-q="r1q2" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>Only with querySelector, not getElementById</div>
+        <div class="option" data-q="r1q2" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>Yes, but only after removing the disabled attribute via JS</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R1 · Q3 — HTML Validity ⚡</div>
+      <div class="q-title">A &lt;div&gt; is nested inside a &lt;span&gt;. What does the browser actually do with it?</div>
+      <div class="options">
+        <div class="option" data-q="r1q3" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>Renders it normally — browsers allow any nesting</div>
+        <div class="option" data-q="r1q3" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>Throws a console error and hides the div</div>
+        <div class="option" data-q="r1q3" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>Auto-corrects silently — pushes the div outside the span</div>
+        <div class="option" data-q="r1q3" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>Wraps it in a new anonymous inline element</div>
+      </div>
+    </div>
+
+    <button class="submit-btn r1-btn" onclick="submitRound(1)">SUBMIT ROUND 1</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ROUND 2 — CSS Superpower
+  ══════════════════════════════════════ -->
+  <div class="q-panel" id="qp-2">
+
+    <div class="q-card">
+      <div class="q-number">R2 · Q1 — Flexbox</div>
+      <div class="q-title">To make nav links horizontal and evenly spaced, which property goes on the &lt;nav&gt;?</div>
+      <div class="options">
+        <div class="option" data-q="r2q1" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>display: inline; text-align: center</div>
+        <div class="option" data-q="r2q1" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>display: flex; justify-content: space-between</div>
+        <div class="option" data-q="r2q1" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>float: left on each &lt;a&gt; tag</div>
+        <div class="option" data-q="r2q1" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>display: flex; align-items: center only</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R2 · Q2 — Text Decoration ⚡</div>
+      <div class="q-title">What single property removes the default underline from all nav links?</div>
+      <div class="options">
+        <div class="option" data-q="r2q2" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>underline: none</div>
+        <div class="option" data-q="r2q2" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>font-style: normal</div>
+        <div class="option" data-q="r2q2" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>text-decoration: none</div>
+        <div class="option" data-q="r2q2" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>border-bottom: 0</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R2 · Q3 — Border ⚡</div>
+      <div class="q-title">Only the active link gets a bottom border. Why can't you just use <code style="font-family:'Space Mono',monospace;font-size:0.8em;">border</code>?</div>
+      <div class="options">
+        <div class="option" data-q="r2q3" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>border is not supported on &lt;a&gt; tags</div>
+        <div class="option" data-q="r2q3" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>border adds all 4 sides — use border-bottom instead</div>
+        <div class="option" data-q="r2q3" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>border needs a parent with position: relative</div>
+        <div class="option" data-q="r2q3" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>border only works with block-level elements</div>
+      </div>
+    </div>
+
+    <button class="submit-btn r2-btn" onclick="submitRound(2)">SUBMIT ROUND 2</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ROUND 3 — Break My Website (XSS)
+  ══════════════════════════════════════ -->
+  <div class="q-panel" id="qp-3">
+
+    <div class="q-card">
+      <div class="q-number">R3 · Q1 — XSS</div>
+      <div class="q-title">You type <code style="font-family:'Space Mono',monospace;font-size:0.8em;">&lt;h1&gt;HACKED&lt;/h1&gt;</code> into the search input and a giant heading appears. Why?</div>
+      <div class="options">
+        <div class="option" data-q="r3q1" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>The browser auto-formats all search results as headings</div>
+        <div class="option" data-q="r3q1" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>innerHTML parses and renders actual HTML from the input</div>
+        <div class="option" data-q="r3q1" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>h1 tags are always rendered regardless of context</div>
+        <div class="option" data-q="r3q1" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>JS automatically converts strings to DOM nodes</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R3 · Q2 — XSS Trigger ⚡</div>
+      <div class="q-title">This injection runs JavaScript — what event triggered the code?</div>
+      <div class="q-code">&lt;img src="x" onerror="...malicious code..." /&gt;</div>
+      <div class="options">
+        <div class="option" data-q="r3q2" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>onload fires when src is loaded successfully</div>
+        <div class="option" data-q="r3q2" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>onerror fires because src="x" fails — and runs the JS</div>
+        <div class="option" data-q="r3q2" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>onclick — user has to click the broken image</div>
+        <div class="option" data-q="r3q2" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>onmount fires when the element is added to the DOM</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R3 · Q3 — Fix ⚡</div>
+      <div class="q-title">One word change makes ALL three injection attacks harmless. What is it?</div>
+      <div class="options">
+        <div class="option" data-q="r3q3" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>Change innerHTML → textContent</div>
+        <div class="option" data-q="r3q3" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>Change getElementById → querySelector</div>
+        <div class="option" data-q="r3q3" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>Add "use strict" at the top of the script</div>
+        <div class="option" data-q="r3q3" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>Change let → const for the val variable</div>
+      </div>
+    </div>
+
+    <button class="submit-btn r3-btn" onclick="submitRound(3)">SUBMIT ROUND 3</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ROUND 4 — JS Chaos Challenges
+  ══════════════════════════════════════ -->
+  <div class="q-panel" id="qp-4">
+
+    <div class="q-card">
+      <div class="q-number">R4 · Q1 — Type Coercion</div>
+      <div class="q-title">score starts at 1. User types "10" and clicks Play. What does score show?</div>
+      <div class="q-code"><span class="kw">let</span> score = <span class="num">1</span>;
+<span class="kw">function</span> <span class="fn">play</span>() {
+  <span class="kw">let</span> val = document.<span class="fn">getElementById</span>(<span class="str">"num"</span>).value;
+  score += val;
+}</div>
+      <div class="options">
+        <div class="option" data-q="r4q1" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>11</div>
+        <div class="option" data-q="r4q1" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>110</div>
+        <div class="option" data-q="r4q1" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>NaN</div>
+        <div class="option" data-q="r4q1" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>"1" + 10 = "110"</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R4 · Q2 — Object Reference</div>
+      <div class="q-title">What does <code style="font-family:'Space Mono',monospace;font-size:0.8em;">b.value</code> log?</div>
+      <div class="q-code"><span class="kw">let</span> a = { value: <span class="num">10</span> };
+<span class="kw">let</span> b = a;
+a = { value: <span class="num">20</span> };
+console.<span class="fn">log</span>(b.value);</div>
+      <div class="options">
+        <div class="option" data-q="r4q2" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>20 — b follows a to the new object</div>
+        <div class="option" data-q="r4q2" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>undefined — b lost its reference</div>
+        <div class="option" data-q="r4q2" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>10 — b still points to the original object</div>
+        <div class="option" data-q="r4q2" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>ReferenceError</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R4 · Q3 — Recursion</div>
+      <div class="q-title">What does <code style="font-family:'Space Mono',monospace;font-size:0.8em;">f(1)</code> return?</div>
+      <div class="q-code"><span class="kw">function</span> <span class="fn">f</span>(n) {
+  <span class="kw">if</span> (n &gt; <span class="num">3</span>) <span class="kw">return</span> n;
+  <span class="kw">return</span> <span class="fn">f</span>(n + <span class="num">1</span>);
+}
+console.<span class="fn">log</span>(<span class="fn">f</span>(<span class="num">1</span>));</div>
+      <div class="options">
+        <div class="option" data-q="r4q3" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>1</div>
+        <div class="option" data-q="r4q3" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>3</div>
+        <div class="option" data-q="r4q3" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>4</div>
+        <div class="option" data-q="r4q3" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>Infinite loop / stack overflow</div>
+      </div>
+    </div>
+
+    <button class="submit-btn r4-btn" onclick="submitRound(4)">SUBMIT ROUND 4</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ROUND 5 — Guess the Output
+  ══════════════════════════════════════ -->
+  <div class="q-panel" id="qp-5">
+
+    <div class="q-card">
+      <div class="q-number">R5 · Q1 — ASI Trap</div>
+      <div class="q-title">What does this log?</div>
+      <div class="q-code"><span class="kw">function</span> <span class="fn">foo</span>() {
+  <span class="kw">return</span>
+  { value: <span class="num">42</span> }
+}
+console.<span class="fn">log</span>(<span class="fn">foo</span>());</div>
+      <div class="options">
+        <div class="option" data-q="r5q1" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>{ value: 42 }</div>
+        <div class="option" data-q="r5q1" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>42</div>
+        <div class="option" data-q="r5q1" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>undefined</div>
+        <div class="option" data-q="r5q1" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>SyntaxError</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R5 · Q2 — Closure Loop ⚡</div>
+      <div class="q-title">Change let → var. What do the 3 functions log?</div>
+      <div class="q-code"><span class="kw">const</span> funcs = [];
+<span class="kw">for</span> (<span class="kw">var</span> i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {
+  funcs.push(() =&gt; i * i);
+}
+console.<span class="fn">log</span>(funcs[<span class="num">0</span>](), funcs[<span class="num">1</span>](), funcs[<span class="num">2</span>]());</div>
+      <div class="options">
+        <div class="option" data-q="r5q2" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>0  1  4</div>
+        <div class="option" data-q="r5q2" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>1  4  9</div>
+        <div class="option" data-q="r5q2" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>9  9  9</div>
+        <div class="option" data-q="r5q2" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>0  0  0</div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-number">R5 · Q3 — Array Coercion + Holes ⚡</div>
+      <div class="q-title">What does the first line log? And what does <code style="font-family:'Space Mono',monospace;font-size:0.8em;">1 in arr</code> return?</div>
+      <div class="q-code">console.<span class="fn">log</span>([<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>] + [<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]);
+
+<span class="kw">const</span> arr = [<span class="num">1</span>, , , <span class="num">4</span>];
+console.<span class="fn">log</span>(<span class="num">1</span> <span class="kw">in</span> arr);</div>
+      <div class="options">
+        <div class="option" data-q="r5q3" data-val="A" onclick="selectOption(this)"><div class="opt-key">A</div>[1,2,3,4,5,6]  and  true</div>
+        <div class="option" data-q="r5q3" data-val="B" onclick="selectOption(this)"><div class="opt-key">B</div>"1,2,34,5,6"  and  false</div>
+        <div class="option" data-q="r5q3" data-val="C" onclick="selectOption(this)"><div class="opt-key">C</div>21  and  true</div>
+        <div class="option" data-q="r5q3" data-val="D" onclick="selectOption(this)"><div class="opt-key">D</div>"1,2,34,5,6"  and  true</div>
+      </div>
+    </div>
+
+    <button class="submit-btn r5-btn" onclick="submitRound(5)">SUBMIT ROUND 5</button>
+  </div>
+
+  <!-- ══ SCOREBOARD ══ -->
+  <div class="scoreboard" id="scoreboard">
+    <div class="score-card">
+      <h2>🎉 Final Score</h2>
+      <div class="score-big" id="scoreBig">—</div>
+      <div class="score-label" id="scoreLabel">OUT OF 15</div>
+      <div class="score-message" id="scoreMessage"></div>
+    </div>
+    <div class="breakdown" id="breakdownTable"></div>
+  </div>
+
+</main>
+
+<script>
+  // ── CORRECT ANSWERS ──
+  const ANSWERS = {
+    r1q1: 'B', r1q2: 'B', r1q3: 'C',
+    r2q1: 'B', r2q2: 'C', r2q3: 'B',
+    r3q1: 'B', r3q2: 'B', r3q3: 'A',
+    r4q1: 'B', r4q2: 'C', r4q3: 'C',
+    r5q1: 'C', r5q2: 'C', r5q3: 'B'
+  };
+
+  const ROUND_LABELS = {
+    1: 'R1 · HTML',
+    2: 'R2 · CSS',
+    3: 'R3 · BREAK',
+    4: 'R4 · JS',
+    5: 'R5 · OUTPUT'
+  };
+
+  const ROUND_Q_KEYS = {
+    1: ['r1q1','r1q2','r1q3'],
+    2: ['r2q1','r2q2','r2q3'],
+    3: ['r3q1','r3q2','r3q3'],
+    4: ['r4q1','r4q2','r4q3'],
+    5: ['r5q1','r5q2','r5q3']
+  };
+
+  const ROUND_COLORS = {
+    1: 'var(--accent)',
+    2: 'var(--accent3)',
+    3: '#ff6b6b',
+    4: 'var(--accent4)',
+    5: 'var(--accent2)'
+  };
+
+  const submitted = new Set();
+  const studentAnswers = {};
+
+  function switchRound(n) {
+    document.querySelectorAll('.q-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.round-sel-btn').forEach(b => b.classList.remove('active'));
+    const panel = document.getElementById('qp-' + n);
+    if (panel) panel.classList.add('active');
+    document.querySelectorAll('.round-sel-btn')[n - 1].classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function selectOption(el) {
+    const qKey = el.dataset.q;
+    // Deselect all options for this question
+    document.querySelectorAll(`.option[data-q="${qKey}"]`).forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    studentAnswers[qKey] = el.dataset.val;
+  }
+
+  function submitRound(n) {
+    submitted.add(n);
+
+    // Save answers for this round
+    ROUND_Q_KEYS[n].forEach(key => {
+      if (!studentAnswers[key]) studentAnswers[key] = null; // unanswered
+    });
+
+    // Mark tab done
+    document.querySelectorAll('.round-sel-btn')[n - 1].classList.add('done-round');
+
+    // Toast
+    const toast = document.getElementById('toast');
+    toast.style.display = 'block';
+    setTimeout(() => toast.style.display = 'none', 2000);
+
+    // Progress bar
+    const pct = (submitted.size / 5) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    if (n < 5) {
+      setTimeout(() => switchRound(n + 1), 500);
+    } else {
+      // All rounds submitted — show score
+      setTimeout(() => showScore(), 700);
+    }
+  }
+
+  function showScore() {
+    // Hide all panels
+    document.querySelectorAll('.q-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.round-sel-btn').forEach(b => b.classList.remove('active'));
+
+    // Calculate total
+    let total = 0;
+    const roundScores = {};
+
+    for (let r = 1; r <= 5; r++) {
+      let rScore = 0;
+      ROUND_Q_KEYS[r].forEach(key => {
+        if (studentAnswers[key] === ANSWERS[key]) { rScore++; total++; }
+      });
+      roundScores[r] = rScore;
+    }
+
+    // Display big score
+    document.getElementById('scoreBig').textContent = total + '/15';
+    document.getElementById('scoreLabel').textContent = 'CORRECT ANSWERS';
+
+    // Message
+    let msg = '';
+    if (total === 15) msg = '🔥 Perfect score! You crushed it!';
+    else if (total >= 12) msg = '⚡ Great work — nearly flawless!';
+    else if (total >= 9)  msg = '👍 Solid effort, keep pushing!';
+    else if (total >= 6)  msg = '🌱 Good start — review the answers!';
+    else                  msg = '😅 Hang in there — you\'ll get it!';
+    document.getElementById('scoreMessage').textContent = msg;
+
+    // Breakdown table
+    let html = '<div class="breakdown-header">// ROUND BREAKDOWN</div>';
+    for (let r = 1; r <= 5; r++) {
+      const sc = roundScores[r];
+      const keys = ROUND_Q_KEYS[r];
+      let dots = '';
+      keys.forEach(key => {
+        const correct = studentAnswers[key] === ANSWERS[key];
+        const answered = studentAnswers[key] !== null && studentAnswers[key] !== undefined;
+        const cls = correct ? 'correct' : (answered ? 'wrong' : 'skip');
+        dots += `<div class="dot ${cls}"></div>`;
+      });
+      html += `
+        <div class="breakdown-row">
+          <span class="breakdown-round">${ROUND_LABELS[r]}</span>
+          <div class="breakdown-dots">${dots}</div>
+          <span class="breakdown-score" style="color:${ROUND_COLORS[r]}">${sc}/3</span>
+        </div>`;
+    }
+    document.getElementById('breakdownTable').innerHTML = html;
+
+    // Show scoreboard
+    const sb = document.getElementById('scoreboard');
+    sb.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
