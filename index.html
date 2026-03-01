@@ -545,12 +545,6 @@
       opacity: 0.8;
     }
 
-    #realQR img {
-      width: 180px;
-      height: auto;
-      aspect-ratio: 1 / 1;
-      max-width: 100%;
-    }
 
     .inject-output {
       background: var(--surface);
@@ -1671,16 +1665,29 @@ console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">
     let qrMade = false;
 
     function openQRModal() {
-      document.getElementById("qrModal").classList.add("open");
+      const modal = document.getElementById("qrModal");
+      const qrContainer = document.getElementById("realQR");
+      const linkBox = document.getElementById("studentLink");
 
-      if (!qrMade) {
-        generateQR();
-        qrMade = true;
-      }
+      // show modal FIRST
+      modal.classList.add("open");
 
+      // clear old QR
+      qrContainer.innerHTML = "";
+
+      // wait until modal is rendered
+      requestAnimationFrame(() => {
+        new QRCode(qrContainer, {
+          text: window.location.href,
+          width: 180,
+          height: 180,
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      });
+
+      linkBox.textContent = window.location.href;
     }
 
     
 </body >
-
 </html >
