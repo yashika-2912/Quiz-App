@@ -1699,30 +1699,47 @@ console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">
   <script>
     let qrMade = false;
 
-    function openQRModal() {
-      document.getElementById("qrModal").classList.add("open");
+    <script>
+      function openQRModal() {
+  const modal = document.getElementById("qrModal");
+      const qrContainer = document.getElementById("realQR");
 
-      if (!qrMade) {
-        generateQR();
-        qrMade = true;
-      }
-    }
+      // show modal FIRST
+      modal.classList.add("open");
 
-    function generateQR() {
-      const baseURL =
-        window.location.origin +
-        window.location.pathname.replace("index.html", "");
+      // clear old QR
+      qrContainer.innerHTML = "";
 
-      const studentURL = baseURL + "student.html";
+  // wait until modal is rendered
+  requestAnimationFrame(() => {
+        new QRCode(qrContainer, {
+          text: window.location.href,
+          width: 180,
+          height: 180,
+          correctLevel: QRCode.CorrectLevel.H
+        });
+  });
 
-      document.getElementById("studentLink").textContent = studentURL;
+      document.getElementById("studentLink").textContent =
+      window.location.href;
+}
+  </script>
 
-      new QRCode(document.getElementById("realQR"), {
-        text: studentURL,
-        width: 180,
-        height: 180
-      });
-    }
+  function generateQR() {
+  const baseURL =
+  window.location.origin +
+  window.location.pathname.replace("index.html", "");
+
+  const studentURL = baseURL + "student.html";
+
+  document.getElementById("studentLink").textContent = studentURL;
+
+  new QRCode(document.getElementById("realQR"), {
+  text: studentURL,
+  width: 180,
+  height: 180
+  });
+  }
   </script>
 </body>
 
