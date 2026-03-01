@@ -545,6 +545,14 @@
       opacity: 0.8;
     }
 
+    /* Ensure the height is not being forced to a 'long' value */
+    #realQR img {
+      width: 180px !important;
+      height: 180px !important;
+      /* Force a square aspect ratio */
+      object-fit: contain;
+    }
+
     .inject-output {
       background: var(--surface);
       border: 1px solid var(--border);
