@@ -1680,67 +1680,7 @@ console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">
 
     }
 
-    function generateQR() {
-      const baseURL =
-        window.location.origin +
-        window.location.pathname.replace("index.html", "");
+    
+</body >
 
-      const studentURL = baseURL + "student.html";
-
-      document.getElementById("studentLink").textContent = studentURL;
-
-      new QRCode(document.getElementById("realQR"), {
-        text: studentURL,
-        width: 180,
-        height: 180
-      });
-    }
-  </script>
-  <script>
-    let qrMade = false;
-
-    <script>
-      function openQRModal() {
-  const modal = document.getElementById("qrModal");
-      const qrContainer = document.getElementById("realQR");
-
-      // show modal FIRST
-      modal.classList.add("open");
-
-      // clear old QR
-      qrContainer.innerHTML = "";
-
-  // wait until modal is rendered
-  requestAnimationFrame(() => {
-        new QRCode(qrContainer, {
-          text: window.location.href,
-          width: 180,
-          height: 180,
-          correctLevel: QRCode.CorrectLevel.H
-        });
-  });
-
-      document.getElementById("studentLink").textContent =
-      window.location.href;
-}
-  </script>
-
-  function generateQR() {
-  const baseURL =
-  window.location.origin +
-  window.location.pathname.replace("index.html", "");
-
-  const studentURL = baseURL + "student.html";
-
-  document.getElementById("studentLink").textContent = studentURL;
-
-  new QRCode(document.getElementById("realQR"), {
-  text: studentURL,
-  width: 180,
-  height: 180
-  });
-  }
-  </script>
-</body>
-
-</html>
+</html >
