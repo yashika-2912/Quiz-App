@@ -1624,44 +1624,6 @@ console.<span class="fn">log</span>(<span class="num">3</span> <span class="kw">
     }
   </script>
   <script>
-    const studentURL = "https://yashika-2912.github.io/Quiz-App/student.html";
-
-    document.getElementById("studentLink").textContent = studentURL;
-
-    new QRCode(document.getElementById("realQR"), {
-      text: studentURL,
-      width: 180,
-      height: 180
-    });
-  </script>
-  <script>
-    let qrCreated = false;
-
-    function generateQR() {
-      if (qrCreated) return;
-
-      const base = window.location.origin +
-        window.location.pathname.replace("index.html", "");
-
-      const studentURL = base + "student.html";
-
-      document.getElementById("studentLink").textContent = studentURL;
-
-      new QRCode(document.getElementById("realQR"), {
-        text: studentURL,
-        width: 180,
-        height: 180
-      });
-
-      qrCreated = true;
-    }
-
-    document.querySelector(".qr-btn").addEventListener("click", function () {
-      document.getElementById("qrModal").classList.add("open");
-      generateQR();
-    });
-  </script>
-  <script>
     let qrMade = false;
 
     function openQRModal() {
